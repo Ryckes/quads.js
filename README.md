@@ -25,9 +25,9 @@ If you find this project useful and want other options implemented (other format
 
 # Usage
 
-`
-node quads.js <filename>[ <iterations>[ <error threshold]]
-`
+```bash
+  node quads.js <filename>[ <iterations>[ <error threshold]]
+```
 
 Iterations defaults to 1024, and error threshold defaults to 0.5.
 With a greater number of iterations the script will generate more
