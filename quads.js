@@ -3,7 +3,8 @@ var fs = require('fs'),
     PNG = require('pngjs').PNG,
     Quad = require('./Quad.js').Quad,
     PriorityQueue = require('js-priority-queue'),
-    drawBorders = false;
+    drawBorders = true,
+    minRectSizeForBorders = 6;
 
 function drawTree(data, quad) {
     quad.walk(function(leaf) {
@@ -17,7 +18,9 @@ function drawTree(data, quad) {
                 current.x = rect.x + i;
                 current.y = rect.y + j;
                 position = (current.y * quad.getWidth() + current.x) << 2;
-                if (drawBorders && (i == 0 || j == 0)) {
+                if (drawBorders && (i == 0 || j == 0) &&
+                    rect.width >= minRectSizeForBorders &&
+                    rect.height >= minRectSizeForBorders) {
                     // Borders
                     for (var k = 0; k < 3; k++)
                         data[position + k] = 0;
