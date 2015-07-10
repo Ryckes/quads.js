@@ -3,8 +3,24 @@ var fs = require('fs'),
     PNG = require('pngjs').PNG,
     Quad = require('./Quad.js').Quad,
     PriorityQueue = require('js-priority-queue'),
-    drawBorders = true,
-    minRectSizeForBorders = 6;
+    cmdFlags = require('commander'),
+    setup = {};
+
+cmdFlags
+    .version('0.2.0')
+    .usage('<file> [options]')
+    .option('-b, --borders', 'Enable border drawing in subnodes')
+    .option('-i, --iterations <number>', 'Perform up to <number> iterations', function(i) { return parseInt(i, 10); }, 1024)
+    .option('-e, --error-threshold <number>', 'Adjust the error threshold required for a new frame to be saved to a file', parseFloat, 0.5)
+    .parse(process.argv);
+
+if (!cmdFlags.args.length)
+    cmdFlags.help(); // This also stops execution
+
+setup.filename = cmdFlags.args[0];
+setup.drawBorders = cmdFlags.borders;
+setup.iterations = cmdFlags.iterations;
+setup.errorThreshold = cmdFlags.errorThreshold;
 
 function drawTree(data, quad) {
     quad.walk(function(leaf) {
@@ -18,9 +34,8 @@ function drawTree(data, quad) {
                 current.x = rect.x + i;
                 current.y = rect.y + j;
                 position = (current.y * quad.getWidth() + current.x) << 2;
-                if (drawBorders && (i == 0 || j == 0) &&
-                    rect.width >= minRectSizeForBorders &&
-                    rect.height >= minRectSizeForBorders) {
+                if (setup.drawBorders &&
+                    (i == 0 || j == 0)) {
                     // Borders
                     for (var k = 0; k < 3; k++)
                         data[position + k] = 0;
@@ -47,16 +62,7 @@ function getFilename(iteration) {
     return 'frames/' + str + '.png';
 }
 
-if (process.argv.length < 3 ||
-    process.argv.length > 5) {
-    console.log('Usage: ' + process.argv[0] + ' ' + process.argv[1] + ' <filename>[ <iterations>[ <error threshold>]]');
-    console.log();
-    console.log('Iterations defaults to 1024');
-    console.log('Error threshold defaults to 0.5');
-    process.exit(1);
-}
-
-fs.createReadStream(process.argv[2])
+fs.createReadStream(setup.filename)
     .pipe(new PNG({
         filterType: 4
     }))
@@ -65,10 +71,10 @@ fs.createReadStream(process.argv[2])
         var rgba = new Buffer(this.data); // Copy
 
         var quad = new Quad(rgba, this.width, this.height);
-        var iterations = process.argv[3] || 1024,
+        var iterations = setup.iterations,
             iteration = 0;
 
-        var errorThreshold = parseFloat(process.argv[4] || 0.5);
+        var errorThreshold = setup.errorThreshold;
 
         var queue = new PriorityQueue({ comparator: function(a, b) {
             return score(b) - score(a);
