@@ -137,12 +137,21 @@ function Node(rgba, rgbaAccumulated, col, row, width, height, totalWidth) {
                 children[i].walkLeaves(cb);
     }
 
+    function paint(data, i, j, color) {
+        // Disclaimer: format/library specific
+        position = ((row + j) * totalWidth + col + i) << 2; // = *4
+        for (var k = 0; k < 4; k++) {
+            data[position + k] = color[k];
+        }
+    }
+
     this.expand = expand;
     this.getArea = getArea;
     this.getAverage = getAverage;
     this.getError = getError;
     this.getRect = getRect;
     this.walkLeaves = walkLeaves;
+    this.paint = paint;
 }
 
 exports.Quad = Quad;
