@@ -94,7 +94,8 @@ fs.createReadStream(setup.filename)
                 return;
             }
 
-            while (previousError !== null && previousError - currentError / (this.width * this.height) < errorThreshold){
+            while (previousError !== null &&
+                   previousError - currentError / (this.width * this.height) < errorThreshold) {
                 if (queue.length === 0) break;
                 if (iteration >= iterations) {
                     reExpand(); // output.png
