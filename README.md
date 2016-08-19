@@ -75,6 +75,8 @@ produces circles.
 
 ![Veronica Maggio](img/maggio_circles.png)
 
+All the source images were obtained from alpha.wallhaven.cc and I
+claim no ownership on any of them.
 
 # TODO
 
