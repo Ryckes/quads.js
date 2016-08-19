@@ -6,12 +6,18 @@ var fs = require('fs'),
     cmdFlags = require('commander'),
     setup = {};
 
+var Shapes = {
+    RECT: 1,
+    ROUNDED: 2
+};
+
 cmdFlags
     .version('0.2.0')
     .usage('<file> [options]')
     .option('-b, --borders', 'Enable border drawing in subnodes')
     .option('-i, --iterations <number>', 'Perform up to <number> iterations', function(i) { return parseInt(i, 10); }, 1024)
     .option('-e, --error-threshold <number>', 'Adjust the error threshold required for a new frame to be saved to a file', parseFloat, 0.5)
+    .option('-s, --shape <type>', 'Choose the shape of the nodes of the quad tree: "rect" (default) or "rounded".', 'rect')
     .parse(process.argv);
 
 if (!cmdFlags.args.length)
@@ -22,28 +28,77 @@ setup.drawBorders = cmdFlags.borders;
 setup.iterations = cmdFlags.iterations;
 setup.errorThreshold = cmdFlags.errorThreshold;
 
-function drawTree(data, quad) {
+if (cmdFlags.shape === 'rect') { setup.shape = Shapes.RECT; }
+else if (cmdFlags.shape === 'rounded') { setup.shape = Shapes.ROUNDED; }
+else { cmdFlags.help(); process.exit(1); }
+
+function drawTree(data, quad, shape) {
     quad.walk(function(leaf) {
         var rect = leaf.getRect(), // Rekt
             average = leaf.getAverage();
 
         var current = {},
             position;
+
+        var cornerRadius = Math.floor(Math.min(rect.width, rect.height) / 2);
+        var corners = [[cornerRadius, cornerRadius],
+                       [cornerRadius, rect.height - cornerRadius],
+                       [rect.width - cornerRadius, rect.height - cornerRadius],
+                       [rect.width - cornerRadius, cornerRadius]];
         for (var i = 0; i < rect.width; i++) {
             for (var j = 0; j < rect.height; j++) {
                 current.x = rect.x + i;
                 current.y = rect.y + j;
-                position = (current.y * quad.getWidth() + current.x) << 2;
-                if (setup.drawBorders &&
-                    (i == 0 || j == 0)) {
-                    // Borders
-                    for (var k = 0; k < 3; k++)
-                        data[position + k] = 0;
-                    data[position + 3] = 255;
+                position = (current.y * quad.getWidth() + current.x) << 2; // = *4
+
+                if (shape === Shapes.RECT) {
+                    if (setup.drawBorders &&
+                        (i == 0 || j == 0)) {
+                        // Borders
+                        for (var k = 0; k < 3; k++)
+
+                            data[position + k] = 0;
+                        data[position + 3] = 255;
+                    }
+                    else {
+                        for (k = 0; k < 4; k++) {
+                            data[position + k] = average[k];
+                        }
+                    }
                 }
-                else
-                    for (k = 0; k < 4; k++)
-                        data[position + k] = average[k];
+                else if (shape === Shapes.ROUNDED) {
+                    var paintBlack = true;
+                    // Take advantage of symmetry with top left
+                    // corner
+                    var x = i;
+                    if (x > rect.width / 2) x = rect.width - x;
+                    var y = j;
+                    if (y > rect.height / 2) y = rect.height - y;
+
+                    if (x > cornerRadius || y > cornerRadius) {
+                        paintBlack = false;
+                    }
+                    else {
+                        var xdist = x - cornerRadius;
+                        var ydist = y - cornerRadius;
+                        var sqrDist = xdist * xdist + ydist * ydist;
+
+                        if (sqrDist <= cornerRadius * cornerRadius) {
+                            paintBlack = false;
+                        }
+                    }
+
+                    if (paintBlack) {
+                        // Black
+                        for (k = 0; k < 3; k++)
+                            data[position + k] = 0;
+                        data[position + 3] = 255;
+                    }
+                    else {
+                        for (k = 0; k < 4; k++)
+                            data[position + k] = average[k];
+                    }
+                }
             }
         }
     });
@@ -89,7 +144,7 @@ fs.createReadStream(setup.filename)
 
         function reExpand() {
             if (iteration >= iterations) {
-                drawTree(this.data, quad);
+                drawTree(this.data, quad, setup.shape);
                 this.pack().pipe(fs.createWriteStream('output.png'));
                 return;
             }
@@ -116,7 +171,7 @@ fs.createReadStream(setup.filename)
 
             previousError = currentError / (this.width * this.height);
             
-            drawTree(this.data, quad);
+            drawTree(this.data, quad, setup.shape);
 
             this.pack().pipe(fs.createWriteStream(getFilename(iteration)));
             this.once('end', reExpand);
