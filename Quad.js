@@ -146,6 +146,7 @@ function Node(rgba, rgbaAccumulated, col, row, width, height, totalWidth) {
     }
 
     this.expand = expand;
+    this.isLeaf = isLeaf;
     this.getArea = getArea;
     this.getAverage = getAverage;
     this.getError = getError;
