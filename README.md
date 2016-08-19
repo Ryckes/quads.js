@@ -59,8 +59,22 @@ the gifs from the script.
 
 # Samples
 
+Rectangular nodes, with, without, and with randomly-colored borders.
+
+![Landscape](img/colorful_rect.png)
+![KingKong](img/white_kingkong_rect.gif)
+![Homer](img/homer_random_rect.gif)
+
+Rounded nodes.
+
 ![Doggy](img/dog_1_rounded.png)
 ![Doggy](img/dog_2.gif)
+
+If the image is a square (aspect ratio 1:1) the option "rounded"
+produces circles.
+
+![Veronica Maggio](img/maggio_circles.png)
+
 
 # TODO
 
