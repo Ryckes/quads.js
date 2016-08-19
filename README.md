@@ -26,8 +26,19 @@ If you find this project useful and want other options implemented (other format
 # Usage
 
 ```bash
-  node quads.js <filename>[ <iterations>[ <error threshold]]
+  node quads.js <filename> [options]
 ```
+
+Find out about the syntax using:
+
+```bash
+  node quads.js --help
+```
+
+Currently, it is possible to enable borders, specify maximum number of
+node expansions (iterations), change the required error difference
+between frames, shape of nodes (rectangles or rounded/circles) and
+color of background and borders (when enabled).
 
 Iterations defaults to 1024, and error threshold defaults to 0.5.
 With a greater number of iterations the script will generate more
@@ -40,11 +51,16 @@ that reduce the error very little.
 Besides the aforementioned missing features in this project, this
 script does not limit the depth or size of each node in the QuadTree,
 so the results may vary a little. I provided a commandline option to
-turn off the borders (sometimes they are great, other times the result
+turn on the borders (sometimes they are great, other times the result
 without borders is much nicer) and I plan to experiment with color
 distance formulae, different borders (maybe colorful ones) and maybe
 use [gifencoder](https://github.com/eugeneware/gifencoder) to generate
 the gifs from the script.
+
+# Samples
+
+![Doggy](img/dog_1_rounded.png)
+![Doggy](img/dog_2.gif)
 
 # TODO
 
