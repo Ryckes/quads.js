@@ -4,9 +4,10 @@ var fs = require('fs'),
     Quad = require('./lib/Quad').Quad,
     color = require('./lib/color'),
     PriorityQueue = require('js-priority-queue'),
-    setup = require('./lib/setup');
+    setup = require('./lib/setup'),
+    PNGImage = require('./lib/PNGImage');
 
-function paintLeaf(data, quad, shape, backgroundColor, leaf) {
+function paintLeaf(image, quad, shape, backgroundColor, leaf) {
     var rect = leaf.getRect(), // Rekt
     average = leaf.getAverage();
 
@@ -25,10 +26,10 @@ function paintLeaf(data, quad, shape, backgroundColor, leaf) {
             if (shape === setup.Shapes.RECT) {
                 if (setup.drawBorders &&
                     (i == 0 || j == 0)) {
-                    leaf.paint(data, i, j, effectiveBackgroundColor);
+                    leaf.paint(image, i, j, effectiveBackgroundColor);
                 }
                 else {
-                    leaf.paint(data, i, j, average);
+                    leaf.paint(image, i, j, average);
                 }
             }
             else if (shape === setup.Shapes.ROUNDED) {
@@ -54,10 +55,10 @@ function paintLeaf(data, quad, shape, backgroundColor, leaf) {
                 }
 
                 if (paintBackground) {
-                    leaf.paint(data, i, j, effectiveBackgroundColor);
+                    leaf.paint(image, i, j, effectiveBackgroundColor);
                 }
                 else {
-                    leaf.paint(data, i, j, average);
+                    leaf.paint(image, i, j, average);
                 }
             }
         }
@@ -65,8 +66,8 @@ function paintLeaf(data, quad, shape, backgroundColor, leaf) {
 }
 
 
-function drawTree(data, quad, shape, backgroundColor) {
-    quad.walk(paintLeaf.bind(null, data, quad, shape, backgroundColor));
+function drawTree(image, quad, shape, backgroundColor) {
+    quad.walk(paintLeaf.bind(null, image, quad, shape, backgroundColor));
 }
 
 function score(a) {
@@ -93,6 +94,7 @@ fs.createReadStream(setup.filename)
     .on('parsed', function() {
 
         var rgba = new Buffer(this.data); // Copy
+        var image = new PNGImage(this.data, this.width);
 
         var quad = new Quad(rgba, this.width, this.height);
         var iterations = setup.iterations,
@@ -141,7 +143,7 @@ fs.createReadStream(setup.filename)
             console.log('Iteration #' + iteration);
 
             if (previousError === null) {
-                drawTree(this.data, quad, setup.shape, setup.backgroundColor);
+                drawTree(image, quad, setup.shape, setup.backgroundColor);
             }
             else {
                 // Redraw only the necessary parts
@@ -153,7 +155,7 @@ fs.createReadStream(setup.filename)
                         continue;
                     }
 
-                    paintLeaf(this.data, quad,
+                    paintLeaf(image, quad,
                               setup.shape, setup.backgroundColor,
                               node);
                 }
