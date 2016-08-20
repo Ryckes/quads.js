@@ -10,8 +10,6 @@ function paintLeaf(data, quad, shape, backgroundColor, leaf) {
     var rect = leaf.getRect(), // Rekt
     average = leaf.getAverage();
 
-    var current = {};
-
     var cornerRadius = Math.floor(Math.min(rect.width, rect.height) / 2);
     var corners = [[cornerRadius, cornerRadius],
                    [cornerRadius, rect.height - cornerRadius],
@@ -24,13 +22,9 @@ function paintLeaf(data, quad, shape, backgroundColor, leaf) {
 
     for (var i = 0; i < rect.width; i++) {
         for (var j = 0; j < rect.height; j++) {
-            current.x = rect.x + i;
-            current.y = rect.y + j;
-
             if (shape === setup.Shapes.RECT) {
                 if (setup.drawBorders &&
                     (i == 0 || j == 0)) {
-                    // Borders
                     leaf.paint(data, i, j, effectiveBackgroundColor);
                 }
                 else {
