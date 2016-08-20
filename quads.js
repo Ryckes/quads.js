@@ -21,24 +21,24 @@ function paintLeaf(image, quad, shape, backgroundColor, leaf) {
     if (effectiveBackgroundColor === 'random')
         effectiveBackgroundColor = color.randomColor();
 
-    for (var i = 0; i < rect.width; i++) {
-        for (var j = 0; j < rect.height; j++) {
+    for (var row = 0; row < rect.height; row++) {
+        for (var col = 0; col < rect.width; col++) {
             if (shape === setup.Shapes.RECT) {
                 if (setup.drawBorders &&
-                    (i == 0 || j == 0)) {
-                    leaf.paint(image, i, j, effectiveBackgroundColor);
+                    (row == 0 || col == 0)) {
+                    leaf.paint(image, row, col, effectiveBackgroundColor);
                 }
                 else {
-                    leaf.paint(image, i, j, average);
+                    leaf.paint(image, row, col, average);
                 }
             }
             else if (shape === setup.Shapes.ROUNDED) {
                 var paintBackground = true;
                 // Take advantage of symmetry with top left
                 // corner
-                var x = i;
+                var x = col;
                 if (x > rect.width / 2) x = rect.width - x;
-                var y = j;
+                var y = row;
                 if (y > rect.height / 2) y = rect.height - y;
 
                 if (x > cornerRadius || y > cornerRadius) {
@@ -55,10 +55,10 @@ function paintLeaf(image, quad, shape, backgroundColor, leaf) {
                 }
 
                 if (paintBackground) {
-                    leaf.paint(image, i, j, effectiveBackgroundColor);
+                    leaf.paint(image, row, col, effectiveBackgroundColor);
                 }
                 else {
-                    leaf.paint(image, i, j, average);
+                    leaf.paint(image, row, col, average);
                 }
             }
         }
@@ -96,7 +96,8 @@ fs.createReadStream(setup.filename)
         var rgba = new Buffer(this.data); // Copy
         var image = new PNGImage(this.data, this.width);
 
-        var quad = new Quad(rgba, this.width, this.height);
+        var quad = new Quad(new PNGImage(rgba, this.width),
+                            this.width, this.height);
         var iterations = setup.iterations,
             iteration = 0;
 
