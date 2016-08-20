@@ -1,6 +1,6 @@
 
 var assert = require('chai').assert;
-var color = require('../color');
+var color = require('../lib/color');
 
 describe('color', function() {
     describe('hexToArray', function() {

@@ -2,6 +2,9 @@
   "name": "quads.js",
   "version": "0.2.0",
   "description": "Clone of https://github.com/fogleman/Quads. Use QuadTrees to divide an image according to the Mean Squared Error of each node and represent each node as the average of the color of its pixels.",
+  "scripts": {
+    "test": "mocha"
+  },
   "main": "quads.js",
   "dependencies": {
     "chai": "^3.5.0",
